@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -36,6 +37,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 /*
  * This file contains an example of a Linear "OpMode".
@@ -72,6 +75,7 @@ public class test extends LinearOpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
+    private IMU imu = null;
 
 
     @Override
@@ -82,6 +86,13 @@ public class test extends LinearOpMode {
         leftBackDrive  = hardwareMap.get(DcMotor.class, "1");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "2");
         rightBackDrive = hardwareMap.get(DcMotor.class, "3");
+
+        imu = hardwareMap.get(IMU.class, "imu");
+        //adjust orientation
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
+        imu.initialize(parameters);
 
         //set direction
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -104,6 +115,9 @@ public class test extends LinearOpMode {
             double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
             double lateral =  gamepad1.left_stick_x * 1.1;
             double yaw     =  gamepad1.right_stick_x;
+
+
+            double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
@@ -136,6 +150,7 @@ public class test extends LinearOpMode {
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
+            telemetry.addData("imu?", "radian " + botHeading);
             telemetry.update();
         }
     }}
